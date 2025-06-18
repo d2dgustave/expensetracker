@@ -24,4 +24,5 @@ def add_category():
     return render_template('add_category.html', categories=categories)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # app.run(debug=False)
+    app.run(debug=False)
