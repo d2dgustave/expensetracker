@@ -1,0 +1,28 @@
+<!doctype html>
+<title>Add Expense Category</title>
+<h1>Add Expense Category</h1>
+<form method="post">
+    <label for="name">Category Name:</label>
+    <input type="text" name="name" required><br>
+    <label for="description">Description:</label>
+    <input type="text" name="description"><br>
+    <input type="submit" value="Add Category">
+</form>
+
+<hr>
+
+<h2>Existing Categories</h2>
+<table border="1">
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Description</th>
+    </tr>
+    {% for category in categories %}
+    <tr>
+        <td>{{ category['id'] }}</td>
+        <td>{{ category['name'] }}</td>
+        <td>{{ category['description'] }}</td>
+    </tr>
+    {% endfor %}
+</table>
