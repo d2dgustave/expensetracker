@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, url_for
 import sqlite3
 
 app = Flask(__name__)
@@ -23,6 +23,32 @@ def add_category():
     conn.close()
     return render_template('add_category.html', categories=categories)
 
+# Add these routes after your existing routes
+@app.route('/edit/<int:id>', methods=('GET', 'POST'))
+def edit_category(id):
+    conn = get_db_connection()
+    category = conn.execute('SELECT * FROM expense_category WHERE id = ?', (id,)).fetchone()
+    if category is None:
+        conn.close()
+        return "Category not found", 404
+ 
+    if request.method == 'POST':
+        name = request.form['name']
+        description = request.form['description']
+        
+        conn.execute(
+            'UPDATE expense_category SET name = ?, description = ? WHERE id = ?',
+            (name, description, id)
+        )
+        conn.commit()
+        conn.close()
+        return redirect(url_for('add_category'))
+    
+    conn.close()
+    return render_template('edit_category.html', category=category)
+
+
+
 if __name__ == '__main__':
+    app.run(debug=True)
     # app.run(debug=False)
-    app.run(debug=False)
