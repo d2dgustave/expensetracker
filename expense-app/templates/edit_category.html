@@ -1,0 +1,11 @@
+<!doctype html>
+<title>Edit Expense Category</title>
+<h1>Edit Expense Category</h1>
+<form method="post">
+    <label for="name">Category Name:</label>
+    <input type="text" name="name" value="{{ category['name'] }}" required><br>
+    <label for="description">Description:</label>
+    <input type="text" name="description" value="{{ category['description'] }}"><br>
+    <input type="submit" value="Update Category">
+</form>
+<a href="{{ url_for('add_category') }}">Cancel</a>
