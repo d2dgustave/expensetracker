@@ -8,4 +8,5 @@ To start the server, open terminal and make sure you are in the expense-app fold
 Then, run the following in the terminal
 
 source ./venv/bin/activate
+
 python3 app.py
