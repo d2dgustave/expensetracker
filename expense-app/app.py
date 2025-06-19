@@ -28,7 +28,10 @@ def add_category():
 def edit_category(id):
     conn = get_db_connection()
     category = conn.execute('SELECT * FROM expense_category WHERE id = ?', (id,)).fetchone()
-    
+    if category is None:
+        conn.close()
+        return "Category not found", 404
+ 
     if request.method == 'POST':
         name = request.form['name']
         description = request.form['description']
