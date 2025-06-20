@@ -1,0 +1,158 @@
+name: Continuous Deployment Workflow
+
+on:
+  push:
+    branches:
+      - "main"
+
+jobs:
+  build:
+    runs-on: self-hosted
+    steps:
+      - name: Build and Package
+        run: | 
+          echo "Building..."
+          sleep 10  # Simulate build time
+
+  deploy-test:
+    runs-on: self-hosted
+    needs: build
+    permissions:
+      deployments: write
+    steps:
+      - uses: chrnorm/deployment-action@v2
+        name: Deploy to Test Environment
+        id: deploy-to-test
+        with:
+          token: '${{ github.token }}'
+          environment-url: http://test.et.daytodayautomation.com:5000
+          environment: test
+
+      - name: Deploy to Test
+        run: | 
+          echo "Deploying..."
+          sleep 7  # Simulate deployment time
+
+      - name: Update deployment status (success)
+        if: success()
+        uses: chrnorm/deployment-status@v2
+        with:
+          token: '${{ github.token }}'
+          environment-url: ${{ steps.deploy-to-test.outputs.environment_url }}
+          deployment-id: ${{ steps.deploy-to-test.outputs.deployment_id }}
+          state: 'success'
+
+      - name: Update deployment status (failure)
+        if: failure()
+        uses: chrnorm/deployment-status@v2
+        with:
+          token: '${{ github.token }}'
+          environment-url: ${{ steps.deploy-to-test.outputs.environment_url }}
+          deployment-id: ${{ steps.deploy-to-test.outputs.deployment_id }}
+          state: 'failure'
+
+  test:
+    runs-on: self-hosted
+    needs: deploy-test
+    steps:
+      - name: Run Tests
+        run: | 
+          echo "Running tests..."
+          sleep 10  # Simulate test time
+          echo "Tests passed!"
+
+  deploy-staging:
+    runs-on: self-hosted
+    needs: test
+    permissions:
+      deployments: write
+    steps:
+      - uses: chrnorm/deployment-action@v2
+        name: Deploy to Test Environment
+        id: deploy-to-staging
+        with:
+          token: '${{ github.token }}'
+          environment-url: http://stg.et.daytodayautomation.com:5000
+          environment: staging
+
+      - name: Deploy to Staging
+        run: | 
+          echo "Deploying to staging..."
+          sleep 8  # Simulate deployment time
+
+      - name: Update deployment status (success)
+        if: success()
+        uses: chrnorm/deployment-status@v2
+        with:
+          token: '${{ github.token }}'
+          environment-url: ${{ steps.deploy-to-staging.outputs.environment_url }}
+          deployment-id: ${{ steps.deploy-to-staging.outputs.deployment_id }}
+          state: 'success'
+
+      - name: Update deployment status (failure)
+        if: failure()
+        uses: chrnorm/deployment-status@v2
+        with:
+          token: '${{ github.token }}'
+          environment-url: ${{ steps.deploy-to-staging.outputs.environment_url }}
+          deployment-id: ${{ steps.deploy-to-staging.outputs.deployment_id }}
+          state: 'failure'
+
+
+  test-staging:
+    runs-on: self-hosted
+    needs: deploy-staging
+    steps:
+      - name: Run Staging Tests
+        run: | 
+          echo "Running staging tests..."
+          sleep 5  # Simulate test time
+          echo "Staging tests passed!"
+
+  deploy-production:
+    runs-on: self-hosted
+    needs: test-staging
+    permissions:
+      deployments: write
+    steps:
+      - uses: chrnorm/deployment-action@v2
+        name: Deploy to Production Environment
+        id: deploy-to-production
+        with:
+          token: '${{ github.token }}'
+          environment-url: http://prod.et.daytodayautomation.com:5000
+          environment: production
+
+      - name: Deploy to Production
+        run: |     
+            echo "Deploying to production..."
+            sleep 7  # Simulate deployment time
+            echo "Production deployment successful!"
+
+      - name: Update deployment status (success)
+        if: success()
+        uses: chrnorm/deployment-status@v2
+        with:
+          token: '${{ github.token }}'
+          environment-url: ${{ steps.deploy-to-production.outputs.environment_url }}
+          deployment-id: ${{ steps.deploy-to-production.outputs.deployment_id }}
+          state: 'success'
+
+      - name: Update deployment status (failure)
+        if: failure()
+        uses: chrnorm/deployment-status@v2
+        with:
+          token: '${{ github.token }}'
+          environment-url: ${{ steps.deploy-to-production.outputs.environment_url }}
+          deployment-id: ${{ steps.deploy-to-production.outputs.deployment_id }}
+          state: 'failure'
+
+  test-production:
+    runs-on: self-hosted
+    needs: deploy-production
+    steps:
+      - name: Run Smoke Tests in Production
+        run: | 
+          echo "Running smoke tests..."
+          sleep 5  # Simulate test time
+          echo "Smoke tests passed!"
