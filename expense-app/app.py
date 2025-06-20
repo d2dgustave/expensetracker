@@ -1,10 +1,12 @@
+import os
 from flask import Flask, render_template, request, redirect, url_for
 import sqlite3
 
 app = Flask(__name__)
+app.config['DATABASE'] = os.environ.get('DATABASE_URL', 'expense.db')
 
 def get_db_connection():
-    conn = sqlite3.connect('expense.db')
+    conn = sqlite3.connect(app.config['DATABASE'])
     conn.row_factory = sqlite3.Row
     return conn
 
