@@ -38,4 +38,6 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Unit test with pytest
       run: |
-        pytest test_app.py
+        cd expense-app
+        # run the tests with pytest
+        pytest test_app.py --maxfail=1 --disable-warnings -q
