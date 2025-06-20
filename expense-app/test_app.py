@@ -106,4 +106,5 @@ def test_form_validation(client):
         'description': 'Should fail'
     }, follow_redirects=True)
     
+    assert response.status_code == 200
     assert b'Category Name is required' in response.data

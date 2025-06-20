@@ -1,6 +1,13 @@
 <!doctype html>
 <title>Add Expense Category</title>
 <h1>Add Expense Category</h1>
+
+{% if error %}
+    <div style="color: red; padding: 10px; margin-bottom: 15px; border: 1px solid red;">
+        {{ error }}
+    </div>
+{% endif %}
+
 <form method="post">
     <label for="name">Category Name:</label>
     <input type="text" name="name" required><br>

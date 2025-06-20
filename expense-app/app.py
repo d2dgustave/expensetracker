@@ -13,17 +13,26 @@ def get_db_connection():
 @app.route('/add', methods=('GET', 'POST'))
 def add_category():
     conn = get_db_connection()
+    error = None
+    
     if request.method == 'POST':
         name = request.form['name']
         description = request.form['description']
-        conn.execute(
-            'INSERT INTO expense_category (name, description) VALUES (?, ?)',
-            (name, description)
-        )
-        conn.commit()
+        
+        # Validate inputs
+        if not name:
+            error = 'Category Name is required'
+        else:
+            conn.execute(
+                'INSERT INTO expense_category (name, description) VALUES (?, ?)',
+                (name, description)
+            )
+            conn.commit()
+    
     categories = conn.execute('SELECT * FROM expense_category').fetchall()
     conn.close()
-    return render_template('add_category.html', categories=categories)
+    return render_template('add_category.html', categories=categories, error=error)
+
 
 # Add these routes after your existing routes
 @app.route('/edit/<int:id>', methods=('GET', 'POST'))
