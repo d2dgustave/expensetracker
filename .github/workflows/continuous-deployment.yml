@@ -1,0 +1,63 @@
+name: CD Deployment
+
+on:
+  push:
+    branches:
+      - "ETA-17*"
+
+jobs:
+  build:
+    runs-on: self-hosted
+    steps:
+      - name: Build and Package
+        run: | 
+          echo "Building..."
+          sleep 10  # Simulate build time
+
+  deploy-test:
+    runs-on: self-hosted
+    needs: build
+    steps:
+      - name: Deploy to Test
+        run: | 
+          echo "Deploying..."
+          sleep 10  # Simulate deployment time
+
+  test:
+    runs-on: self-hosted
+    needs: deploy-test
+    steps:
+      - name: Run Tests
+        run: | 
+          echo "Running tests..."
+          sleep 10  # Simulate test time
+          echo "Tests passed!"
+
+  deploy-staging:
+    runs-on: self-hosted
+    needs: test
+    steps:
+      - name: Deploy to Staging
+        run: | 
+          echo "Deploying to staging..."
+          sleep 10  # Simulate deployment time
+
+  test-staging:
+    runs-on: self-hosted
+    needs: deploy-staging
+    steps:
+      - name: Run Staging Tests
+        run: | 
+          echo "Running staging tests..."
+          sleep 10  # Simulate test time
+          echo "Staging tests passed!"
+
+  deploy-production:
+    runs-on: self-hosted
+    needs: test-staging
+    steps:
+      - name: Deploy to Production
+        run: |     
+            echo "Deploying to production..."
+            sleep 10  # Simulate deployment time
+            echo "Production deployment successful!"
