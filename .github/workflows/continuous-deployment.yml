@@ -1,9 +1,9 @@
-name: CD Deployment
+name: Continuous Deployment Workflow
 
 on:
   push:
     branches:
-      - "ETA-17*"
+      - "main"
 
 jobs:
   build:
