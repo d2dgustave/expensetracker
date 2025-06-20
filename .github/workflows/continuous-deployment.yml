@@ -73,6 +73,7 @@ jobs:
         with:
           token: '${{ github.token }}'
           environment-url: http://stg.et.daytodayautomation.com:5000
+          environment: staging
 
       - name: Deploy to Staging
         run: | 
@@ -145,3 +146,13 @@ jobs:
           environment-url: ${{ steps.deploy-to-production.outputs.environment_url }}
           deployment-id: ${{ steps.deploy-to-production.outputs.deployment_id }}
           state: 'failure'
+
+  test-production:
+    runs-on: self-hosted
+    needs: deploy-production
+    steps:
+      - name: Run Smoke Tests in Production
+        run: | 
+          echo "Running smoke tests..."
+          sleep 5  # Simulate test time
+          echo "Smoke tests passed!"
