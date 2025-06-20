@@ -17,11 +17,39 @@ jobs:
   deploy-test:
     runs-on: self-hosted
     needs: build
+    permissions:
+      deployments: write
     steps:
+      - uses: chrnorm/deployment-action@v2
+        name: Deploy to Test Environment
+        id: deploy-to-test
+        with:
+          token: '${{ github.token }}'
+          environment-url: http://127.0.1:5000
+          environment: test
+
       - name: Deploy to Test
         run: | 
           echo "Deploying..."
           sleep 10  # Simulate deployment time
+
+      - name: Update deployment status (success)
+        if: success()
+        uses: chrnorm/deployment-status@v2
+        with:
+          token: '${{ github.token }}'
+          environment-url: ${{ steps.deploy-to-test.outputs.environment_url }}
+          deployment-id: ${{ steps.deploy-to-test.outputs.deployment_id }}
+          state: 'success'
+
+      - name: Update deployment status (failure)
+        if: failure()
+        uses: chrnorm/deployment-status@v2
+        with:
+          token: '${{ github.token }}'
+          environment-url: ${{ steps.deploy-to-test.outputs.environment_url }}
+          deployment-id: ${{ steps.deploy-to-test.outputs.deployment_id }}
+          state: 'failure'
 
   test:
     runs-on: self-hosted
