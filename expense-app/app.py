@@ -58,7 +58,13 @@ def edit_category(id):
     conn.close()
     return render_template('edit_category.html', category=category)
 
-
+@app.route('/delete/<int:id>')
+def delete_category(id):
+    conn = get_db_connection()
+    conn.execute('DELETE FROM expense_category WHERE id = ?', (id,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('add_category'))
 
 if __name__ == '__main__':
     app.run(debug=True)
