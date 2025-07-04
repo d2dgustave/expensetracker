@@ -12,8 +12,9 @@ def client():
     # Initialize test database
     with app.app_context():
         conn = get_db_connection()
-        with app.open_resource('schema.sql') as f:
-            conn.executescript(f.read().decode('utf8'))
+        # Read schema file directly since app.open_resource may not work in tests
+        with open('schema.sql', 'r') as f:
+            conn.executescript(f.read())
         conn.commit()
 
     # Create test client
@@ -23,6 +24,7 @@ def client():
     # Clean up after tests
     with app.app_context():
         conn = get_db_connection()
+        conn.execute('DROP TABLE IF EXISTS expense')
         conn.execute('DROP TABLE IF EXISTS expense_category')
         conn.commit()
         conn.close()
@@ -129,3 +131,130 @@ def test_form_validation(client):
 
     assert response.status_code == 200
     assert b'Category Name is required' in response.data
+
+
+# Test expense functionality
+def test_add_expense(client):
+    # First add a category
+    client.post('/add', data={
+        'name': 'Test Category',
+        'description': 'Test Description'
+    })
+
+    # Add an expense
+    response = client.post('/expenses/add', data={
+        'date': '2024-01-15',
+        'description': 'Test Expense',
+        'vendor': 'Test Vendor',
+        'category_id': '1',
+        'amount': '25.50'
+    }, follow_redirects=True)
+
+    assert response.status_code == 200
+    assert b'Test Expense' in response.data
+    assert b'Test Vendor' in response.data
+    assert b'25.50' in response.data
+
+
+def test_edit_expense(client):
+    # Add category and expense
+    client.post('/add', data={
+        'name': 'Test Category',
+        'description': 'Test Description'
+    })
+    client.post('/expenses/add', data={
+        'date': '2024-01-15',
+        'description': 'Original Expense',
+        'vendor': 'Original Vendor',
+        'category_id': '1',
+        'amount': '10.00'
+    })
+
+    # Edit the expense
+    response = client.post('/expenses/edit/1', data={
+        'date': '2024-01-16',
+        'description': 'Updated Expense',
+        'vendor': 'Updated Vendor',
+        'category_id': '1',
+        'amount': '15.75'
+    }, follow_redirects=True)
+
+    assert response.status_code == 200
+    assert b'Updated Expense' in response.data
+    assert b'Updated Vendor' in response.data
+    assert b'15.75' in response.data
+    assert b'Original Expense' not in response.data
+
+
+def test_delete_expense(client):
+    # Add category and expense
+    client.post('/add', data={
+        'name': 'Test Category',
+        'description': 'Test Description'
+    })
+    client.post('/expenses/add', data={
+        'date': '2024-01-15',
+        'description': 'To Be Deleted',
+        'vendor': 'Test Vendor',
+        'category_id': '1',
+        'amount': '20.00'
+    })
+
+    # Verify expense exists
+    response = client.get('/expenses')
+    assert b'To Be Deleted' in response.data
+
+    # Delete the expense
+    response = client.get('/expenses/delete/1', follow_redirects=True)
+    assert response.status_code == 200
+    assert b'To Be Deleted' not in response.data
+
+
+def test_expense_validation(client):
+    # Add a category first
+    client.post('/add', data={
+        'name': 'Test Category',
+        'description': 'Test Description'
+    })
+
+    # Test missing required fields
+    response = client.post('/expenses/add', data={
+        'date': '',
+        'description': 'Test',
+        'category_id': '1',
+        'amount': '10.00'
+    }, follow_redirects=True)
+    assert b'Date is required' in response.data
+
+    response = client.post('/expenses/add', data={
+        'date': '2024-01-15',
+        'description': '',
+        'category_id': '1',
+        'amount': '10.00'
+    }, follow_redirects=True)
+    assert b'Description is required' in response.data
+
+    response = client.post('/expenses/add', data={
+        'date': '2024-01-15',
+        'description': 'Test',
+        'category_id': '',
+        'amount': '10.00'
+    }, follow_redirects=True)
+    assert b'Category is required' in response.data
+
+    response = client.post('/expenses/add', data={
+        'date': '2024-01-15',
+        'description': 'Test',
+        'category_id': '1',
+        'amount': ''
+    }, follow_redirects=True)
+    assert b'Amount is required' in response.data
+
+    # Test invalid amount
+    response = client.post('/expenses/add', data={
+        'date': '2024-01-15',
+        'description': 'Test',
+        'category_id': '1',
+        'amount': 'invalid'
+    }, follow_redirects=True)
+    assert b'Amount must be a valid number' in response.data

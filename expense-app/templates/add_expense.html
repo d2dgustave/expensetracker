@@ -1,0 +1,52 @@
+<!doctype html>
+<title>Add Expense</title>
+<h1>Add New Expense</h1>
+
+{% if error %}
+    <div style="color: red; padding: 10px; margin-bottom: 15px; border: 1px solid red; background-color: #ffe6e6;">
+        {{ error }}
+    </div>
+{% endif %}
+
+<form method="post">
+    <div style="margin-bottom: 15px;">
+        <label for="date">Date:</label><br>
+        <input type="date" name="date" required style="padding: 5px; width: 200px;">
+    </div>
+    
+    <div style="margin-bottom: 15px;">
+        <label for="description">Description:</label><br>
+        <input type="text" name="description" required style="padding: 5px; width: 300px;" placeholder="Enter expense description">
+    </div>
+    
+    <div style="margin-bottom: 15px;">
+        <label for="vendor">Vendor:</label><br>
+        <input type="text" name="vendor" style="padding: 5px; width: 300px;" placeholder="Enter vendor name (optional)">
+    </div>
+    
+    <div style="margin-bottom: 15px;">
+        <label for="category_id">Category:</label><br>
+        <select name="category_id" required style="padding: 5px; width: 200px;">
+            <option value="">Select a category</option>
+            {% for category in categories %}
+            <option value="{{ category['id'] }}">{{ category['name'] }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    
+    <div style="margin-bottom: 15px;">
+        <label for="amount">Amount:</label><br>
+        <input type="number" name="amount" step="0.01" min="0" required style="padding: 5px; width: 150px;" placeholder="0.00">
+    </div>
+    
+    <div style="margin-bottom: 15px;">
+        <input type="submit" value="Add Expense" style="background-color: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">
+        <a href="{{ url_for('list_expenses') }}" style="background-color: #f44336; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; margin-left: 10px;">Cancel</a>
+    </div>
+</form>
+
+{% if not categories %}
+<div style="color: orange; padding: 10px; margin-top: 20px; border: 1px solid orange; background-color: #fff3cd;">
+    <strong>Note:</strong> No expense categories found. <a href="{{ url_for('add_category') }}">Create a category first</a> before adding expenses.
+</div>
+{% endif %}
