@@ -1,0 +1,41 @@
+<!doctype html>
+<title>Edit Expense</title>
+<h1>Edit Expense</h1>
+
+<form method="post">
+    <div style="margin-bottom: 15px;">
+        <label for="date">Date:</label><br>
+        <input type="date" name="date" value="{{ expense['date'] }}" required style="padding: 5px; width: 200px;">
+    </div>
+    
+    <div style="margin-bottom: 15px;">
+        <label for="description">Description:</label><br>
+        <input type="text" name="description" value="{{ expense['description'] }}" required style="padding: 5px; width: 300px;">
+    </div>
+    
+    <div style="margin-bottom: 15px;">
+        <label for="vendor">Vendor:</label><br>
+        <input type="text" name="vendor" value="{{ expense['vendor'] or '' }}" style="padding: 5px; width: 300px;">
+    </div>
+    
+    <div style="margin-bottom: 15px;">
+        <label for="category_id">Category:</label><br>
+        <select name="category_id" required style="padding: 5px; width: 200px;">
+            {% for category in categories %}
+            <option value="{{ category['id'] }}" {% if category['id'] == expense['category_id'] %}selected{% endif %}>
+                {{ category['name'] }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+    
+    <div style="margin-bottom: 15px;">
+        <label for="amount">Amount:</label><br>
+        <input type="number" name="amount" step="0.01" min="0" value="{{ expense['amount'] }}" required style="padding: 5px; width: 150px;">
+    </div>
+    
+    <div style="margin-bottom: 15px;">
+        <input type="submit" value="Update Expense" style="background-color: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">
+        <a href="{{ url_for('list_expenses') }}" style="background-color: #f44336; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; margin-left: 10px;">Cancel</a>
+    </div>
+</form>

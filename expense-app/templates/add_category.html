@@ -2,6 +2,10 @@
 <title>Add Expense Category</title>
 <h1>Add Expense Category</h1>
 
+<div style="margin-bottom: 20px;">
+    <a href="{{ url_for('list_expenses') }}" style="background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">Back to Expenses</a>
+</div>
+
 {% if error %}
     <div style="color: red; padding: 10px; margin-bottom: 15px; border: 1px solid red;">
         {{ error }}
