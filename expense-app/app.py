@@ -2,6 +2,8 @@ import os
 from flask import Flask, render_template, request, redirect, url_for
 import sqlite3
 
+# ETA-21 Updated error messages
+
 app = Flask(__name__)
 app.config['DATABASE'] = os.environ.get('DATABASE_URL', 'expense.db')
 
